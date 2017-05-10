@@ -1,7 +1,10 @@
 "use strict";
 
+var DEBUG_MODE = true;
+var COLOR_DEBUG = "red";
+
 ////////////////////////////////////////////////////////////////////////
-//////////////////////////// Events ///////////////////////////////////
+//////////////////////////// Events ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
 class EventEmitter {
@@ -10,7 +13,7 @@ class EventEmitter {
         this.subscribers = null;
     
     
-        console.log('Debug: Object Events created');
+        debugLog('Debug: Object Events created');
         this.subscribers = {};
     }
 
@@ -122,7 +125,7 @@ class PeerConnection extends Events.Emitter {
         
         // Сам конструктор
         //window.peer = this;
-        console.log('Debug: Object PeerConnection created');
+        debugLog('Debug: Object PeerConnection created');
           
         this.socket = socket;
         this.peerUser = peerUser;
@@ -316,7 +319,7 @@ class PeerConnection extends Events.Emitter {
         answer.type = "answer";
         answer.site = obj.site;
         answer.classification = classification;
-        console.log("Debug: получен запрос на классификацию сайта " + answer.site + ", результат = " + answer.classification);
+        debugLog("Debug: получен запрос на классификацию сайта " + answer.site + ", результат = " + answer.classification);
         
         var json = JSON.stringify(answer);
         room.peers[obj.peerId].sendMessage(json);
@@ -325,14 +328,14 @@ class PeerConnection extends Events.Emitter {
         // Установка полученной классификации или классификация своими силами
         
         if (obj.classification === null) { // Сайт не смогли классифицировать
-            console.log("Debug: сайт не смогли классифицировать");
+            debugLog("Debug: сайт не смогли классифицировать");
         }
         else if (stor.get(obj.site) === null) { // Классификация сайта получена и его нужно сохранить в localStorage
             stor.set(obj.site, obj.classification);
-            console.log("Debug: получено и записано: сайт = " + obj.site + ", классификация = " + obj.classification);
+            debugLog("Debug: получено и записано: сайт = " + obj.site + ", классификация = " + obj.classification);
         }
         else { // Сайт уже классифицирован
-            console.log("Debug: сайт уже классифицирован другим пиром");
+            debugLog("Debug: сайт уже классифицирован другим пиром");
         }
     }
     else if (obj.type === "add") {
@@ -386,7 +389,7 @@ class RoomConnection extends Events.Emitter {
         this.pendidateCandidates = null;
         
         // Конструктор
-        console.log('Debug: Object RoomConnection created');
+        debugLog('Debug: Object RoomConnection created');
         window.room = this;
         window.i = 10;
         window.j = 0;
@@ -418,7 +421,7 @@ class RoomConnection extends Events.Emitter {
     
     getPeers() {
         
-        console.log('Peers table refresh');
+        debugLog('Peers table refresh');
         // Include styles
         var style = document.createElement('style');
         style.type = 'text/css';
@@ -733,6 +736,7 @@ class GameRoom {
         
         console.log('Debug: My object GameRoom created');
         this.roomId = 1; // Все подключения скидываем в одну комнату
+        //this.roomId = window.location.search.slice(1);
         this.socket = io(socketUrl);
         this.roomConnection = new RoomConnection(this.roomId, this.socket);
         this.roomConnection.on('joined', this.onJoinedRoom, this);
@@ -768,7 +772,7 @@ class Storage {
     }
 }
 
-
+// Категории
 var keyWordDatabase = [];
 
 var cat = {};
@@ -786,7 +790,7 @@ cat.name = "компьютеры";
 cat.dic = ["памят", "процессор", "клавиатур", "мышь", "монитор"];
 keyWordDatabase.push(cat);
 
-
+// Общие слова, не несущие тематику
 var wordsWithoutSubject = [
     "что",
     "был",
@@ -803,7 +807,6 @@ var wordsWithoutSubject = [
     "как",
     "сво"
 ];
-
 
 function getCategory()
 {
@@ -835,7 +838,7 @@ function getCategory()
             delete frequency[item];
     }
     
-    // Удаляем слова, меньше двух букв
+    // Удаляем слова, меньшие двух букв
     for (var item in frequency)
     {
         if (item.length <= 2)
@@ -849,7 +852,6 @@ function getCategory()
             delete frequency[item];
     }
     
-    // Удаляем слова, меньшие двух букв
     var words = [];
     for (var item in frequency)
     {
@@ -964,15 +966,21 @@ function stem (word) {
 	return stem;
 }
 
+function debugLog(message)
+{
+    if (DEBUG_MODE)
+        console.log('%c%s', 'color:' + COLOR_DEBUG, message);
+}
+
 ////////////////////////////////////////////////////////////////////////
-//////////////////////////// Старт приложения ///////////////////////////////////
+//////////////////////////// Старт приложения //////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
 var log = console.log.bind(console);
 //var gameRoom = new GameRoom('https://' + window.location.hostname); // Herokuapp
-//var gameRoom = new GameRoom('http://' + window.location.hostname + ':3000'); // Local client + local server
+var gameRoom = new GameRoom('http://' + window.location.hostname + ':3000'); // Local client + local server
 //var gameRoom = new GameRoom('https://fakeproject.herokuapp.com'); // Local client + remote server
-var gameRoom = new GameRoom('https://webrtc-classif-network.herokuapp.com'); // Local client + remote server
+//var gameRoom = new GameRoom('https://webrtc-classif-network.herokuapp.com'); // Local client + remote server
 
 
 

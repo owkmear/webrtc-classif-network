@@ -10,7 +10,7 @@ app.listen(port);
 var io = require('socket.io').listen(app);
 
 //port = Number(process.env.PORT || 3000);
-var MAX_ROOM_USERS = 15;
+//var MAX_ROOM_USERS = 15;
 
 //var fs = require('fs');
 //var log = console.log.bind(console);
@@ -88,8 +88,18 @@ Room.prototype = {
     delete this.sockets[id];
   },
   sendTo: function(user, message, data) {
-    var socket = this.sockets[user.getId()];
-    socket.emit(message, data);
+    
+    //console.log('Id: ' + user.getId() + ' mes: ' + message);
+    //console.log(message + message);
+       
+    //try {
+    
+        var socket = this.sockets[user.getId()]; // Error: Cannot read property 'getId' of undefined
+        socket.emit(message, data);
+    
+    //} catch (e) {
+     //   console.log('Ошибка!');
+    //}
   },
   sendToId: function(userId, message, data) {
     return this.sendTo(this.getUserById(userId), message, data);
@@ -129,10 +139,12 @@ function handleSocket(socket) {
 
     // Let's get a room, or create if none still exists
     room = getOrCreateRoom(joinData.roomName);
-    if (room.numUsers() >= MAX_ROOM_USERS) {
+    
+    // TODO: корректная обработка максимального размера комнат, на данный момент ошибка user.getId
+    /*if (room.numUsers() >= MAX_ROOM_USERS) {
       room.sendTo(user, MessageType.ERROR_ROOM_IS_FULL);
       return;
-    }
+    }*/
 
     // Add a new user
     room.addUser(user = new User(), socket);
@@ -181,21 +193,33 @@ function handleSocket(socket) {
   }
 
   function onSdp(message) {
-    room.sendToId(message.userId, MessageType.SDP, {
-      userId: user.getId(),
-      sdp: message.sdp
-    });
+    try {
+        console.log('type = ' + message.sdp.type);
+        room.sendToId(message.userId, MessageType.SDP, {
+          userId: user.getId(),
+          sdp: message.sdp
+        });
+    } catch(e) {
+        console.log('Ошибка: onSdp()');
+    }
   }
 
   function onIceCandidate(message) {
-    room.sendToId(message.userId, MessageType.ICE_CANDIDATE, {
-      userId: user.getId(),
-      candidate: message.candidate
-    });
+    try {
+        room.sendToId(message.userId, MessageType.ICE_CANDIDATE, {
+          userId: user.getId(),
+          candidate: message.candidate
+        });
+    } catch(e) {
+        console.log('Ошибка: onIceCandidate()');
+    }
   }
 }
 
 io.on('connection', handleSocket);
+/*io.on('error', function() {
+    console.log("Error occurred!");
+});*/
 console.log('Running room server on port %d', port);
 
 /*var stdin = process.openStdin();
