@@ -978,9 +978,9 @@ function debugLog(message)
 
 var log = console.log.bind(console);
 //var gameRoom = new GameRoom('https://' + window.location.hostname); // Herokuapp
-var gameRoom = new GameRoom('http://' + window.location.hostname + ':3000'); // Local client + local server
+//var gameRoom = new GameRoom('http://' + window.location.hostname + ':3000'); // Local client + local server
 //var gameRoom = new GameRoom('https://fakeproject.herokuapp.com'); // Local client + remote server
-//var gameRoom = new GameRoom('https://webrtc-classif-network.herokuapp.com'); // Local client + remote server
+var gameRoom = new GameRoom('https://webrtc-classif-network.herokuapp.com'); // Local client + remote server
 
 
 
