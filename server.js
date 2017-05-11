@@ -139,11 +139,7 @@ function handleSocket(socket) {
 
     // Let's get a room, or create if none still exists
     room = getOrCreateRoom(joinData.roomName);
-<<<<<<< HEAD
     
-=======
-	  
->>>>>>> 6bd82ca44ead762bbafd404d33d820f8350731cc
     // TODO: корректная обработка максимального размера комнат, на данный момент ошибка user.getId
     /*if (room.numUsers() >= MAX_ROOM_USERS) {
       room.sendTo(user, MessageType.ERROR_ROOM_IS_FULL);
